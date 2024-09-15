@@ -68,7 +68,7 @@ FROM bellsoft/alpaquita-linux-base:stream-glibc AS install
 
 WORKDIR /sdrpp
 COPY --from=build /libs/* /lib
-COPY --from=build /usr/local/bin /usr/local/bin
+COPY --from=build /usr/local/bin/* . 
 COPY sdrpp.conf.d ./conf.d
 
 RUN <<EOF
@@ -80,13 +80,13 @@ RUN <<EOF
     apk --no-cache add libstdc++ eudev libusb
 EOF
 
-COPY <<EOF /usr/local/bin/startup.sh
+COPY <<EOF startup.sh
     set -e
-    /usr/local/bin/sdrplay_apiService &
-    exec /usr/local/bin/sdrpp -s -r /sdrpp/conf.d
+    /sdrpp/sdrplay_apiService &
+    exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
 EOF
-RUN chmod +x /usr/local/bin/startup.sh
+RUN chmod +x /sdrpp/startup.sh
 
 EXPOSE 5259
 USER sdr
-CMD ["/usr/local/bin/startup.sh" ]
+CMD ["/sdrpp/startup.sh" ]

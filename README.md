@@ -34,3 +34,6 @@ services:
 #     If no volume is specified a default set of configs for sdrpp
 #     will be used.  See sdrpp documentation for more details.
 ```
+## Ackowledgements
+- The SDRplay API is provided by sdrplay at https://sdrplay.com.  Check out their hardware and software options.  The SDRplay is licensed software.  See the terms at sdrplay.com
+- Thanks to Alexandre Roma for creating sdrpp.

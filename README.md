@@ -1,5 +1,5 @@
 # SDRPP Server AMD64 Docker Image
-This image contains a dockerized sdrpp server built for AMD64.
+This project implements a dockerized sdrpp server built for AMD64.
 - SDRplay API 3.15 is included.
 - RTL-SDR is included.
 - SDRPP Releases Nightly Builds is the source for SDRPP.
@@ -36,5 +36,7 @@ services:
 #     will be used.  See sdrpp documentation for more details.
 ```
 ## Ackowledgements
-- The SDRplay API is provided by sdrplay at https://sdrplay.com.  Check out their hardware and software options.  The SDRplay is licensed software.  See the terms at sdrplay.com
+- The SDRplay API is provided by sdrplay at https://sdrplay.com.  
+Check out their hardware and software options.  
+The SDRplay API is licensed software.  See the terms at sdrplay.com
 - Thanks to Alexandre Roma for creating sdrpp.

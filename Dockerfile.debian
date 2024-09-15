@@ -3,6 +3,9 @@
 # Based on an excellent example from github f4fhh/sdrppserver_container
 # D. G. Adams
 # 2024-Aug-21
+#
+# Note: No promises this will work.  This hasn't been updated for a while.
+# It builds an image of about 200 MB.
 
 FROM debian:bookworm-slim AS sdrplay
 

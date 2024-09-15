@@ -9,6 +9,7 @@ the glibc libraries.
 - The sdrpp configs directory can be shared as a volume or a default set is supplied.  
 Be aware that the default may not be what you desire.  sdrpp-server will not run properly
 without a good set of configuration files.
+- Build this with "docker buildx build -t sdrpp-server ." 
 ## Usage:
 I generally run this with a docker compose file:
 ```

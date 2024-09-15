@@ -18,6 +18,10 @@ I generally run this with a docker compose file:
 #
 # D. G. Adams 2024-Aug-18
 #
+# The SDRplay devices need USB read/write permissions.
+# Add: SUBSYSTEMS=="usb", ATTRS{idVendor}=="1df7", MODE="0666"
+# to a file in the docker host /etc/udev/rules.d to allow read/write access.
+
 name: sdrppserver
 services:
   sdrppserver:

@@ -1,0 +1,25 @@
+{
+    "device": "",
+    "devices": {
+        "[00000978] Generic RTL2832U##0": {
+            "biasT": false,
+            "directSampling": 0,
+            "gain": 1,
+            "offsetTuning": false,
+            "ppm": 0,
+            "rtlAgc": false,
+            "sampleRate": 2400000.0,
+            "tunerAgc": false
+        },
+        "[00001090] Generic RTL2832U##0": {
+            "biasT": false,
+            "directSampling": 0,
+            "gain": 0,
+            "offsetTuning": false,
+            "ppm": 0,
+            "rtlAgc": false,
+            "sampleRate": 2400000.0,
+            "tunerAgc": false
+        }
+    }
+}

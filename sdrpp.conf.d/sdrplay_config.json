@@ -1,0 +1,38 @@
+{
+    "device": "RSP2 (1603016100)",
+    "devices": {
+        "RSP2 (1603016100)": {
+            "agc": true,
+            "agcAttack": 500,
+            "agcDecay": 500,
+            "agcDecayDelay": 200,
+            "agcDecayThreshold": 5,
+            "agcSetPoint": -30,
+            "antenna": 0,
+            "biast": false,
+            "bwMode": 8,
+            "fmmwNotch": false,
+            "ifGain": 39,
+            "ifModeId": 0,
+            "lnaGain": 4,
+            "sampleRate": 2000000
+        },
+        "RSPdx (2103083B44)": {
+            "agc": false,
+            "agcAttack": 500,
+            "agcDecay": 500,
+            "agcDecayDelay": 200,
+            "agcDecayThreshold": 5,
+            "agcSetPoint": -30,
+            "antenna": 0,
+            "biast": false,
+            "bwMode": 8,
+            "dabNotch": false,
+            "fmmwNotch": false,
+            "ifGain": 59,
+            "ifModeId": 0,
+            "lnaGain": 27,
+            "sampleRate": 2000000
+        }
+    }
+}

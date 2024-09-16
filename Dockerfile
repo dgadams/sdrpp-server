@@ -78,14 +78,15 @@ RUN <<EOF
     adduser -D sdr
     adduser sdr sdr
     apk --no-cache add libstdc++ eudev libusb
-EOF
 
-COPY <<EOF startup.sh
-    set -e
-    /sdrpp/sdrplay_apiService &
-    exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
+#   make starup file
+    cat <<END >startup.sh
+        set -e
+        /sdrpp/sdrplay_apiService &
+        exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
+END
+    chmod +x /sdrpp/startup.sh
 EOF
-RUN chmod +x /sdrpp/startup.sh
 
 EXPOSE 5259
 USER sdr

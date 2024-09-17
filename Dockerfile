@@ -80,10 +80,11 @@ RUN <<EOF
     apk --no-cache add libstdc++ eudev libusb
 
 #   make starup file
-    cat <<END >startup.sh
-        set -e
-        /sdrpp/sdrplay_apiService &
-        exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
+    cat << 'END' >startup.sh
+#!/bin/sh
+set -e
+/sdrpp/sdrplay_apiService &
+exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
 END
     chmod +x /sdrpp/startup.sh
 EOF

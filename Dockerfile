@@ -75,8 +75,7 @@ RUN <<EOF
     ln -s /lib/libsdrplay_api.so.3.15 /lib/libsdrplay_api.so.3
     ln -s /lib/libsdrplay_api.so.3 /lib/libsdrplay_api.so
     ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
-    adduser -D sdr
-    adduser sdr sdr
+
     apk --no-cache add libstdc++ eudev libusb
 
 #   make starup file
@@ -90,5 +89,5 @@ END
 EOF
 
 EXPOSE 5259
-USER sdr
+USER nobody
 CMD ["/sdrpp/startup.sh" ]

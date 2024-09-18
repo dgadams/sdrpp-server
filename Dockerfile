@@ -21,10 +21,8 @@ RUN <<ENDRUN
     chmod 644 x86_64/libsdrplay_api.so.3.15
     chmod 755 x86_64/sdrplay_apiService
 ENDRUN
-#######################
-# install sdrpp and copy needed libraries
 
-WORKDIR /libs
+# install sdrpp 
 RUN <<ENDRUN
     SDRPP="https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb"
     wget $SDRPP -O sdrpp.deb
@@ -32,10 +30,12 @@ RUN <<ENDRUN
     rm sdrpp.deb
     cp /sdrplay/x86_64/sdrplay_apiService /usr/local/bin/sdrplay_apiService
     cp /usr/bin/sdrpp /usr/local/bin
+ENDRUN
 
 #   copy all needed libraries
-    mkdir sdrpp
-    cp -r /lib/sdrpp /libs/sdrpp
+WORKDIR /libs
+RUN <<ENDRUN
+    mv /lib/sdrpp .
     while read p; do
         cp $p .
     done <<ENDLIST
@@ -55,9 +55,9 @@ RUN <<ENDRUN
         /lib/x86_64-linux-gnu/libXdmcp.so.6
         /lib/x86_64-linux-gnu/libbsd.so.0
         /lib/x86_64-linux-gnu/libmd.so.0
-        /lib/x86_64-linux-gnu/librtlsdr.so.0.6.0
+        /lib/x86_64-linux-gnu/librtlsdr*
         /usr/lib/libsdrpp_core.so
-        /sdrplay/x86_64/libsdrplay_api.so.3.15
+        /sdrplay/x86_64/libsdrplay_api*
 ENDLIST
 
 #   make starup file
@@ -77,14 +77,14 @@ ENDRUN
 FROM bellsoft/alpaquita-linux-base:stream-glibc AS install
 
 WORKDIR /sdrpp
-COPY --from=build /libs/* /lib
-COPY --from=build /usr/local/bin/* . 
+COPY --from=build /libs /lib
+COPY --from=build /usr/local/bin . 
 COPY sdrpp.conf.d ./conf.d
 
 RUN <<ENDRUN
-    ln -s /lib/libsdrplay_api.so.3.15 /lib/libsdrplay_api.so.3
-    ln -s /lib/libsdrplay_api.so.3 /lib/libsdrplay_api.so
-    ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
+#    ln -s /lib/libsdrplay_api.so.3.15 /lib/libsdrplay_api.so.3
+#    ln -s /lib/libsdrplay_api.so.3 /lib/libsdrplay_api.so
+#    ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
     apk --no-cache add libstdc++ libusb
 ENDRUN
 

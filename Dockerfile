@@ -85,7 +85,7 @@ RUN <<ENDRUN
     ln -s /lib/libsdrplay_api.so.3.15 /lib/libsdrplay_api.so.3
     ln -s /lib/libsdrplay_api.so.3 /lib/libsdrplay_api.so
     ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
-    apk --no-cache add libstdc++ eudev libusb
+    apk --no-cache add libstdc++ libusb
 ENDRUN
 
 EXPOSE 5259

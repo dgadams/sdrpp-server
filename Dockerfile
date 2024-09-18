@@ -55,7 +55,7 @@ RUN <<ENDRUN
         /lib/x86_64-linux-gnu/libXdmcp.so.6
         /lib/x86_64-linux-gnu/libbsd.so.0
         /lib/x86_64-linux-gnu/libmd.so.0
-        /lib/x86_64-linux-gnu/librtlsdr*
+        /lib/x86_64-linux-gnu/librtlsdr.so.0.6.0
         /usr/lib/libsdrpp_core.so
         /sdrplay/x86_64/libsdrplay_api*
 ENDLIST
@@ -82,9 +82,7 @@ COPY --from=build /usr/local/bin .
 COPY sdrpp.conf.d ./conf.d
 
 RUN <<ENDRUN
-#    ln -s /lib/libsdrplay_api.so.3.15 /lib/libsdrplay_api.so.3
-#    ln -s /lib/libsdrplay_api.so.3 /lib/libsdrplay_api.so
-#    ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
+    ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
     apk --no-cache add libstdc++ libusb
 ENDRUN
 

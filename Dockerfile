@@ -11,7 +11,7 @@ FROM debian:bookworm-slim AS build
 
 # Get and run SDRplay API installer
 WORKDIR /sdrplay
-RUN <<EOF
+RUN <<ENDRUN
     SDRPLAY=https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run
     apt-get -y update
     apt-get -y install wget ca-certificates
@@ -20,12 +20,12 @@ RUN <<EOF
     ./SDRplay_RSP_API.run --tar -xvf
     chmod 644 x86_64/libsdrplay_api.so.3.15
     chmod 755 x86_64/sdrplay_apiService
-EOF
+ENDRUN
 #######################
 # install sdrpp and copy needed libraries
 
 WORKDIR /libs
-RUN <<EOF
+RUN <<ENDRUN
     SDRPP="https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb"
     wget $SDRPP -O sdrpp.deb
     apt-get -y install ./sdrpp.deb rtl-sdr
@@ -59,7 +59,17 @@ RUN <<EOF
         /usr/lib/libsdrpp_core.so
         /sdrplay/x86_64/libsdrplay_api.so.3.15
 ENDLIST
+
+#   make starup file
+    cat << 'EOF' >/usr/local/bin/startup.sh
+#!/bin/sh
+set -e
+/sdrpp/sdrplay_apiService &
+exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
 EOF
+    chmod +x /usr/local/bin/startup.sh    
+ENDRUN
+
 ######################################################
 # Install binaries and libraries from build into
 # an alpaquita (alpine glibc) image.
@@ -71,22 +81,12 @@ COPY --from=build /libs/* /lib
 COPY --from=build /usr/local/bin/* . 
 COPY sdrpp.conf.d ./conf.d
 
-RUN <<EOF
+RUN <<ENDRUN
     ln -s /lib/libsdrplay_api.so.3.15 /lib/libsdrplay_api.so.3
     ln -s /lib/libsdrplay_api.so.3 /lib/libsdrplay_api.so
     ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
-
     apk --no-cache add libstdc++ eudev libusb
-
-#   make starup file
-    cat << 'END' >startup.sh
-#!/bin/sh
-set -e
-/sdrpp/sdrplay_apiService &
-exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
-END
-    chmod +x /sdrpp/startup.sh
-EOF
+ENDRUN
 
 EXPOSE 5259
 USER nobody

@@ -11,21 +11,21 @@ FROM debian:bookworm-slim AS build
 
 # Get and run SDRplay API installer
 WORKDIR /sdrplay
+ADD https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run ./SDRplay.run
+
 RUN <<ENDRUN
-    SDRPLAY=https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run
     apt-get -y update
-    apt-get -y install wget ca-certificates
-    wget $SDRPLAY -O SDRplay_RSP_API.run
-    chmod +x SDRplay_RSP_API.run
-    ./SDRplay_RSP_API.run --tar -xvf
+    apt-get -y install ca-certificates
+    chmod +x SDRplay.run
+    ./SDRplay.run --tar -xvf
     chmod 644 x86_64/libsdrplay_api.so.3.15
     chmod 755 x86_64/sdrplay_apiService
 ENDRUN
 
-# install sdrpp 
+# install sdrpp
+ADD "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb" ./sdrpp.deb
+ 
 RUN <<ENDRUN
-    SDRPP="https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb"
-    wget $SDRPP -O sdrpp.deb
     apt-get -y install ./sdrpp.deb rtl-sdr
     rm sdrpp.deb
     cp /sdrplay/x86_64/sdrplay_apiService /usr/local/bin/sdrplay_apiService

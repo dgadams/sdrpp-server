@@ -12,6 +12,7 @@ FROM debian:bookworm-slim AS build
 # Get and run SDRplay API installer
 WORKDIR /sdrplay
 ADD https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run ./SDRplay.run
+
 RUN <<ENDRUN
     chmod +x SDRplay.run
     ./SDRplay.run --tar -xvf
@@ -21,15 +22,16 @@ ENDRUN
 
 # install sdrpp
 ADD "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb" ./sdrpp.deb
+
 RUN <<ENDRUN
     apt-get update
-    apt-get -y install ./sdrpp.deb rtl-sdr
+    apt-get -y install ./sdrpp.deb rtl-sdr libusb-1.0-0
     cp /sdrplay/x86_64/sdrplay_apiService /usr/local/bin/sdrplay_apiService
     cp /usr/bin/sdrpp /usr/local/bin
 ENDRUN
 
-#   copy all needed libraries
-WORKDIR /libs
+#   copy all needed libraries.  Kind of a reverse muntzing - add until it quits whinning.
+WORKDIR /base/usr/lib
 RUN <<ENDRUN
     mv /lib/sdrpp .
     while read p; do
@@ -51,37 +53,24 @@ RUN <<ENDRUN
         /lib/x86_64-linux-gnu/libXdmcp.so.6
         /lib/x86_64-linux-gnu/libbsd.so.0
         /lib/x86_64-linux-gnu/libmd.so.0
-        /lib/x86_64-linux-gnu/librtlsdr.so.0.6.0
+        /lib/x86_64-linux-gnu/librtlsdr.so.0
         /usr/lib/libsdrpp_core.so
         /sdrplay/x86_64/libsdrplay_api*
 ENDLIST
-
-#   make starup file
-    cat << 'EOF' >/usr/local/bin/startup.sh
-#!/bin/sh
-set -e
-/sdrpp/sdrplay_apiService &
-exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
-EOF
-    chmod +x /usr/local/bin/startup.sh
 ENDRUN
 
+# grab files  and move binaries
+WORKDIR /base/sdrpp
+COPY sdrpp.conf.d ./conf.d
+COPY sdrpp.sh .
+RUN cp /usr/local/bin/* .
 ######################################################
-# Install binaries and libraries from build into
-# an alpaquita (alpine glibc) image.
 
 FROM bellsoft/alpaquita-linux-base:stream-glibc AS install
 
 WORKDIR /sdrpp
-COPY --from=build /libs /lib
-COPY --from=build /usr/local/bin .
-COPY sdrpp.conf.d ./conf.d
-
-RUN <<ENDRUN
-    ln -s /lib/librtlsdr.so.0.6.0 /lib/librtlsdr.so.0
-    apk --no-cache add libstdc++ libusb
-ENDRUN
-
+COPY --from=build /base /
+RUN apk --no-cache add libstdc++ libusb
 EXPOSE 5259
 USER nobody
-CMD ["/sdrpp/startup.sh" ]
+CMD ["/sdrpp/sdrpp.sh" ]

@@ -12,10 +12,7 @@ FROM debian:bookworm-slim AS build
 # Get and run SDRplay API installer
 WORKDIR /sdrplay
 ADD https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run ./SDRplay.run
-
 RUN <<ENDRUN
-    apt-get -y update
-    apt-get -y install ca-certificates
     chmod +x SDRplay.run
     ./SDRplay.run --tar -xvf
     chmod 644 x86_64/libsdrplay_api.so.3.15
@@ -24,10 +21,9 @@ ENDRUN
 
 # install sdrpp
 ADD "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb" ./sdrpp.deb
- 
 RUN <<ENDRUN
+    apt-get update
     apt-get -y install ./sdrpp.deb rtl-sdr
-    rm sdrpp.deb
     cp /sdrplay/x86_64/sdrplay_apiService /usr/local/bin/sdrplay_apiService
     cp /usr/bin/sdrpp /usr/local/bin
 ENDRUN
@@ -67,7 +63,7 @@ set -e
 /sdrpp/sdrplay_apiService &
 exec /sdrpp/sdrpp -s -r /sdrpp/conf.d
 EOF
-    chmod +x /usr/local/bin/startup.sh    
+    chmod +x /usr/local/bin/startup.sh
 ENDRUN
 
 ######################################################
@@ -78,7 +74,7 @@ FROM bellsoft/alpaquita-linux-base:stream-glibc AS install
 
 WORKDIR /sdrpp
 COPY --from=build /libs /lib
-COPY --from=build /usr/local/bin . 
+COPY --from=build /usr/local/bin .
 COPY sdrpp.conf.d ./conf.d
 
 RUN <<ENDRUN

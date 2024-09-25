@@ -66,11 +66,26 @@ COPY sdrpp.sh .
 RUN cp /usr/local/bin/* .
 ######################################################
 
-FROM bellsoft/alpaquita-linux-base:stream-glibc AS install
+FROM bellsoft/alpaquita-linux-base:stream-glibc AS filesystem
 
-WORKDIR /sdrpp
 COPY --from=build /base /
-RUN apk --no-cache add libstdc++ libusb
+
+RUN <<EOR
+    apk --no-cache add libstdc++ libusb
+
+#   Now remove some alpaquita stuff we don't need
+    rm -rf /lib/gconv
+    rm -rf /lib/locale
+    rm -rf /usr/sbin/sln
+    rm -rf /usr/sbin/ldconfig*
+    rm -rf /usr/share/zoneinfo
+    rm -rf /usr/share/X11
+EOR
+#####################################################################
+
+FROM scratch AS install
+COPY --from=filesystem / /
 EXPOSE 5259
+WORKDIR /sdrpp
 USER nobody
 CMD ["/sdrpp/sdrpp.sh" ]

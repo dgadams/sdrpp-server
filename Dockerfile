@@ -78,8 +78,15 @@ RUN <<EOR
     rm -rf /lib/locale
     rm -rf /usr/sbin/sln
     rm -rf /usr/sbin/ldconfig*
+    rm -rf /usr/sbin/iconvconfig
     rm -rf /usr/share/zoneinfo
     rm -rf /usr/share/X11
+    rm -rf /usr/bin/makedb
+    rm -rf /usr/bin/locale*
+    rm -rf /usr/bin/iconv
+    rm -rf /usr/bin/gencat
+    rm -rf /usr/bin/getconf
+    rm -rf /usr/bin/getent
 EOR
 #####################################################################
 

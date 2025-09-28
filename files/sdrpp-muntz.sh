@@ -16,11 +16,12 @@ shopt -s extglob
 #	EXC+="|libselinux*|libacl.*|libattr.*|libpcre*"		# needed for cp
 	EXC+="|libresolv.*"									# needed for busybox
     EXC+="|libsdrplay_api.so.*|libsdrpp_core.*"         # sdrpp libraries
-    EXC+="|libOpenGL.*|libfftw3f.*|libvolk.*|libzstd.*|libm.*"
+    EXC+="|libOpenGL.*|libfftw3f.*|libvolk*|libzstd.*|libm.*"
     EXC+="|libdl.*|libX11.so.*|libpthread.*|libGLdispatch.*"
     EXC+="|liborc-0.4.*|libxcb.*|libXau.*|libXdmcp.*|libbsd.*"
     EXC+="|libmd.*|librtlsdr.*|libusb*|libstdc++*|libselinux*"
     EXC+="|libudev*|libgcc_s*|librt*|libglfw.*"
+    EXC+="|libGL.so.*|libGLX.so.*|libcap.so.*"
 	EXC+=")"
 	rm -fr $EXC
 

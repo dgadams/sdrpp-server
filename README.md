@@ -6,6 +6,7 @@ This project implements a dockerized sdrpp server built for AMD64.
 ## Notes:
 - The final install image is built on debian
  - There is a Dockerfile.alpaquita that used Alpaquita as a base image instead of debian.
+   but the Alpaquita version is unmaintained.
 - The sdrpp configs directory can be shared as a volume or a default set is supplied.
 Be aware that the default may not be what you desire.  sdrpp-server will not run properly
 without a good set of configuration files.
@@ -25,7 +26,7 @@ name: sdrppserver
 services:
   sdrppserver:
     container_name: sdrpp-server
-    image: sdrpp-server
+    image: dgadams/sdrpp-server:trixie
     restart: unless-stopped
     init: true
     devices:

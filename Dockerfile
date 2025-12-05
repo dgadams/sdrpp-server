@@ -5,10 +5,9 @@
 # Thanks to sdrplay and Alexandre Rouma for making this possible.
 #
 # D. G. Adams
-# 2025-March-12
+# 2025-12-05  Merged muntz.sh into Dockerfile
 
 FROM debian:trixie-slim AS dga-build
-#FROM debian:bookworm-slim AS dga-build
 
 # Get and run SDRplay API installer
 WORKDIR /sdrplay
@@ -44,11 +43,10 @@ EOR
 ######################################################
 # Build our filesystem. Using a new layer removes potential junk.
 # copy all needed files from dga-build.
-# Then call sdrpp-muntz to remove unneeded files
+# Then run the muntzing process to remove unneeded files
 # and last, install busybox.
 
 FROM debian:trixie-slim AS dga-filesystem
-#FROM debian:bookworm-slim AS dga-filesystem
 
 COPY --from=dga-build /usr/lib/sdrpp /lib/sdrpp/
 COPY --from=dga-build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
@@ -58,13 +56,14 @@ COPY --from=dga-build /usr/bin/busybox /usr/bin/
 COPY files/ /sdrpp
 
 RUN <<EOR
-    /sdrpp/sdrpp-muntz.sh
+    bash /sdrpp/muntz.sh
     /bin/busybox --install -s
-    rm -rf /sdrpp/sdrpp-muntz.sh
+    rm /sdrpp/muntz.sh
 EOR
 
 #####################################################################
-#   Ready for scratch.  We use scratch to keep deleted space out of the install layer.
+#   Ready for scratch.  We use scratch to keep deleted space out of
+#   the install layer. Saves almost 500 MB.
 #	Libraries are in /usr/lib/x86_64-linux-gnu
 #	binaries and config files are in /sdrpp
 

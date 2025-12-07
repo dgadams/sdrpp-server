@@ -55,11 +55,34 @@ COPY --from=dga-build /sdrplay/x86_64/sdrplay_apiService /sdrpp/
 COPY --from=dga-build /usr/bin/busybox /usr/bin/
 COPY files/ /sdrpp
 
+SHELL ["/bin/bash", "-c"]
 RUN <<EOR
-    bash /sdrpp/muntz.sh
+    shopt -s extglob # bash extenstion for rm -rf !(execept_files|...)
+
+#   remove all libraries except ...
+    cd /usr/lib/x86_64-linux-gnu
+    EXC="!(libc.*|ld-linux*"
+    EXC+="|libsdrplay_api.so.*|libsdrpp_core.*|libresolv.*"
+    EXC+="|libOpenGL.*|libfftw3f.*|libvolk*|libzstd.*|libm.*"
+    EXC+="|libdl.*|libX11.so.*|libpthread.*|libGLdispatch.*"
+    EXC+="|liborc-0.4.*|libxcb.*|libXau.*|libXdmcp.*|libbsd.*"
+    EXC+="|libmd.*|librtlsdr.*|libusb*|libstdc++*|libselinux*"
+    EXC+="|libudev*|libgcc_s*|librt*|libglfw.*"
+    EXC+="|libGL.so.*|libGLX.so.*|libcap.so.*)"
+    rm -rf $EXC
+
+#   remove anything not needed in the container
+    cd /            && rm -rf !(bin|dev|etc|lib|lib64|proc|run|sbin|sdrpp|sys|usr)
+    cd /etc         && rm -rf !(passwd|group|gshadow|shadow)
+    cd /usr         && rm -rf !(lib|bin|sbin|lib64|libexec)
+    cd /usr/lib     && rm -rf !(x86_64-linux-gnu|sdrpp)
+    cd /usr/sbin    && rm *
+    cd /usr/bin     && rm !(busybox|bash)   # Must be last
+
     /bin/busybox --install -s
-    rm /sdrpp/muntz.sh
 EOR
+SHELL ["/bin/sh", "-c"]
+RUN rm /bin/bash
 
 #####################################################################
 #   Ready for scratch.  We use scratch to keep deleted space out of

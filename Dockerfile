@@ -55,8 +55,8 @@ COPY --from=dga-build /sdrplay/x86_64/sdrplay_apiService /sdrpp/
 COPY --from=dga-build /usr/bin/busybox /usr/bin/
 COPY files/ /sdrpp
 
-SHELL ["/bin/bash", "-c"]
 RUN <<EOR
+#!/bin/bash
     shopt -s extglob # bash extenstion for rm -rf !(execept_files|...)
 
 #   remove all libraries except ...
@@ -80,9 +80,8 @@ RUN <<EOR
     cd /usr/bin     && rm !(busybox|bash)   # Must be last
 
     /bin/busybox --install -s
+    rm /bin/bash
 EOR
-SHELL ["/bin/sh", "-c"]
-RUN rm /bin/bash
 
 #####################################################################
 #   Ready for scratch.  We use scratch to keep deleted space out of

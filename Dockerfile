@@ -74,7 +74,9 @@ RUN <<EOR
 #   remove anything not needed in the container
     cd /            && rm -rf !(bin|dev|etc|lib|lib64|proc|run|sbin|sdrpp|sys|usr)
     cd /etc         && rm -rf !(passwd|group|gshadow|shadow)
-    cd /usr         && rm -rf !(lib|bin|sbin|lib64|libexec)
+#    cd /usr         && rm -rf !(lib|bin|sbin|lib64|libexec)
+    cd /usr         && rm -rf !(lib|bin|sbin|lib64)
+#    cd /usr/libexec && rm -rf !(coreutils)
     cd /usr/lib     && rm -rf !(x86_64-linux-gnu|sdrpp)
     cd /usr/sbin    && rm *
     cd /usr/bin     && rm !(busybox|bash)   # Must be last

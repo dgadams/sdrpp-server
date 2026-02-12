@@ -42,7 +42,7 @@ EOR
 
 ######################################################
 # Build our filesystem. Using a new layer removes potential junk.
-# copy all needed files from dga-build.
+# copy all files from dga-build.
 # Then run the muntzing process to remove unneeded files
 # and last, install busybox.
 

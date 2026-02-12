@@ -76,8 +76,7 @@ ENDRUN
 #   /base/sdrpp holds binaries, config, and startup script
 #   /base/lib holds all needed libraries
 WORKDIR /base/sdrpp
-COPY sdrpp.conf.d ./conf.d
-COPY sdrpp.sh .
+COPY files/* .
 RUN cp /usr/local/bin/* .
 ######################################################
 

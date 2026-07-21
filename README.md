@@ -26,21 +26,25 @@ name: sdrppserver
 services:
   sdrppserver:
     container_name: sdrpp-server
-    image: dgadams/sdrpp-server:trixie
+    image: dgadams/sdrpp-server
     restart: unless-stopped
     init: true
     devices:
       - /dev/bus/usb
     ports:
       - 5259:5259
-    volumes:
-      - /home/doug/servers/conf.sdrpp:/sdrpp/conf.d
-#     Be sure to edit the config file directory to point to your own
+
+#     Be sure to edit the config file directory to point to your own.
+#     If you don't have your own directory just comment out the volumes section.
 #     If no volume is specified a default set of configs for sdrpp
 #     will be used.  See sdrpp documentation for more details.
+
+    volumes:
+      - /home/doug/servers/conf.sdrpp:/sdrpp/conf.d
 ```
 ## Ackowledgements
 - The SDRplay API is provided by sdrplay at https://sdrplay.com.
 Check out their hardware and software options.
 The SDRplay API is licensed software.  See the terms at sdrplay.com
 - Thanks to Alexandre Roma for creating sdrpp.
+- SDR++ website:  https://www.sdrpp.org

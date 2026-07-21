@@ -10,7 +10,7 @@ This project implements a dockerized sdrpp server built for AMD64.
 - The sdrpp configs directory can be shared as a volume or a default set is supplied.
 Be aware that the default may not be what you desire.  sdrpp-server will not run properly
 without a good set of configuration files.
-- Build this with "docker buildx build -t sdrpp-server ."
+- Build this with "docker build -t sdrpp-server ."
 ## Usage:
 I generally run this with a docker compose file:
 ```

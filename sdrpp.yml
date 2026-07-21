@@ -1,0 +1,19 @@
+# sdrpp server
+# server to allow sdrpp connections to sdrplay and rtl-sdr devices
+# Note: init is enabled since sdrpp forks sdrplay.
+#
+# D. G. Adams 2024-Aug-18
+#
+name: sdrppserver
+services:
+  sdrppserver:
+    container_name: sdrpp-server
+    image: dgadams/sdrpp-server
+    restart: unless-stopped
+    init: true
+    devices:
+      - /dev/bus/usb
+    ports:
+      - 5259:5259
+#    volumes:
+#      - /home/doug/.sdr++:/sdrpp/conf.d

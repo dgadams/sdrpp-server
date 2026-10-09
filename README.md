@@ -1,6 +1,6 @@
 # SDRPP Server AMD64 Docker Image
 This project implements a dockerized sdrpp server built for AMD64.
-- SDRplay API 3.15 is included.
+- SDRplay API 3.15.2 is included.
 - RTL-SDR is included.
 - SDRPP Releases Nightly Builds is the source for SDRPP.
 ## Notes:
@@ -12,6 +12,9 @@ Be aware that the default may not be what you desire.  sdrpp-server will not run
 without a good set of configuration files.  Also, it is best to have a local volume path
 because settings are saved in the .json files and will be available through GUI stop/start.
 - Build this with "docker build -t sdrpp-server ."
+- SDR Play has updated the API to 3.15.2 and changes the location of the api files which
+can break the Dockerfile.  Consider downloading the API manually and using a copy command
+instead of add in the API download line. 
 ## Usage:
 I generally run this with a docker compose file:
 ```

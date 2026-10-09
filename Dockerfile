@@ -9,17 +9,18 @@
 
 FROM debian:trixie-slim AS dga-build
 
-# Get and run SDRplay API installer
+# Get and run SDRplay API installer. Note SDRPlay changes the ADD link with every version
+# Consider manually downloading and using the COPY line instead.
 WORKDIR /sdrplay
-ADD https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run ./SDRplay.run
-
+ADD https://sdrplay.com/download/hardware-api-linux/?wpdmdl=1906&refresh=6ac861a5625b01791517093 ./SDRplay.run
+#COPY SDRplay_RSP_API-Linux-3.15.2.run ./SDRplay.run
 RUN <<ENDRUN
     chmod +x SDRplay.run
     ./SDRplay.run --tar -xvf
-    chmod 644 x86_64/libsdrplay_api.so.3.15     #library
-    chmod 755 x86_64/sdrplay_apiService         #binary
+    chmod 644 amd64/libsdrplay_api.so.3.15.2     #library
+    chmod 755 amd64/sdrplay_apiService         #binary
 ENDRUN
-# sdrplay libs and binaries are in /sdrplay/x86_64
+# sdrplay libs and binaries are in /sdrplay/amd64
 
 # install sdrpp
 #ADD "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_bookworm_amd64.deb" ./sdrpp.deb
@@ -34,7 +35,7 @@ ENDRUN
 # Move libraries to x86_64-linux-gnu
 WORKDIR /lib/x86_64-linux-gnu/
 RUN <<EOR
-    cp -a /sdrplay/x86_64/libsdrplay_api* .
+    cp -a /sdrplay/amd64/libsdrplay_api* .
     ln -s libsdrplay_api.so.3.15 libsdrplay_api.so.3
     cp -a /usr/lib/libsdrpp_core.* .
     rm *.a
@@ -51,7 +52,7 @@ FROM debian:trixie-slim AS dga-filesystem
 COPY --from=dga-build /usr/lib/sdrpp /lib/sdrpp/
 COPY --from=dga-build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
 COPY --from=dga-build /usr/bin/sdrpp /sdrpp/
-COPY --from=dga-build /sdrplay/x86_64/sdrplay_apiService /sdrpp/
+COPY --from=dga-build /sdrplay/amd64/sdrplay_apiService /sdrpp/
 COPY --from=dga-build /usr/bin/busybox /usr/bin/
 COPY files/ /sdrpp
 

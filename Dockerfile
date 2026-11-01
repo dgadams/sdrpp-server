@@ -96,3 +96,6 @@ EXPOSE 5259
 WORKDIR /sdrpp
 USER nobody
 CMD ["/sdrpp/sdrpp.sh" ]
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD pidof sdrpp || exit 1

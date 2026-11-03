@@ -11,24 +11,16 @@ This project implements a dockerized sdrpp server built for AMD64.
 Be aware that the default may not be what you desire.  sdrpp-server will not run properly
 without a good set of configuration files.  Also, it is best to have a local volume path
 because settings are saved in the .json files and will be available through GUI stop/start.
-- Build this with "docker build -t sdrpp-server ."
+- Be sure to make any usb devices read/write for all uses on the docker host.
 - SDR Play has updated the API to 3.15.2 and changes the location of the api files which
 can break the Dockerfile.  Consider downloading the API manually and using a copy command
 instead of add in the API download line. 
 ## Usage:
 I generally run this with a docker compose file:
 ```
-# sdrpp server
-# server to allow sdrpp connections to sdrplay and rtl-sdr devices
-#
-# D. G. Adams 2025-03-12
-# The SDRplay devices need USB read/write permissions.
-# Add: SUBSYSTEMS=="usb", ATTRS{idVendor}=="1df7", MODE="0666"
-# to a file in the docker host /etc/udev/rules.d to allow read/write access.
-
-name: sdrppserver
+name: sdrpp-server
 services:
-  sdrppserver:
+  sdrpp-server:
     container_name: sdrpp-server
     image: dgadams/sdrpp-server
     restart: unless-stopped
@@ -37,15 +29,17 @@ services:
       - /dev/bus/usb
     ports:
       - 5259:5259
-
-#     Be sure to edit the config file directory to point to your own.
-#     If you don't have your own directory just comment out the volumes section.
-#     If no volume is specified a default set of configs for sdrpp
-#     will be used.  See sdrpp documentation for more details.
-#     However, using the defaults won't persist settings between restarts.
-
     volumes:
-      - /home/doug/servers/conf.sdrpp:/sdrpp/conf.d
+      - /home/doug/.sdr++:/sdrpp/conf.d
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: timeout 2 nc host.docker.internal 5259 || [ $$? -eq 143 ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+      
 ```
 ## Ackowledgements
 - The SDRplay API is provided by sdrplay at https://sdrplay.com.

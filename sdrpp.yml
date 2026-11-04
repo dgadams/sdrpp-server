@@ -12,16 +12,14 @@ services:
     restart: unless-stopped
     init: true
     devices:
-      - /dev/bus/usb
+      - /dev/bus/usb:/dev/bus/usb
     ports:
       - 5259:5259
     volumes:
       - /home/doug/.sdr++:/sdrpp/conf.d
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     healthcheck:
-      test: timeout 2 nc host.docker.internal 5259 || [ $$? -eq 143 ]
+      test: timeout 1 nc localhost 5259 || [ $$? -eq 143 ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 15s
+      start_period: 10s

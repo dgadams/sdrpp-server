@@ -17,8 +17,9 @@ ENDRUN
 
 # install sdrpp
 ADD "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_trixie_amd64.deb" ./sdrpp.deb
-# --no-install-recommends avoids pulling in extra libs; binutils is only for strip
-# and only exists in this throwaway stage (its files are deleted by the whitelist below).
+# --no-install-recommends avoids pulling in extra libs.
+# busybox-static is a single static binary, so it needs no shared libraries at all.
+# binutils is only for strip and never reaches the final image.
 RUN <<ENDRUN
     set -e
     export DEBIAN_FRONTEND=noninteractive
@@ -26,9 +27,9 @@ RUN <<ENDRUN
     apt-get -y --no-install-recommends install ./sdrpp.deb libusb-1.0-0 libglfw3 busybox binutils
 ENDRUN
 # sdrpp is installed in /usr/bin/sdrpp
-# libraries are in /lib/libsdrpp_core* and /lib/sdrpp
+# libraries are in /usr/lib/libsdrpp_core* and /usr/lib/sdrpp
 
-# Move libraries to x86_64-linux-gnu
+# Put the SDRplay and sdrpp libraries where the loader (and ldd, below) will find them
 WORKDIR /lib/x86_64-linux-gnu/
 RUN <<EOR
     set -e
@@ -36,17 +37,6 @@ RUN <<EOR
     ln -s libsdrplay_api.so.3.15 libsdrplay_api.so.3
     cp -a /usr/lib/libsdrpp_core.* .
     rm -f *.a
-EOR
-
-# Server mode with only SDRplay: delete every other plugin here, before
-# stripping, so no time is spent on files that will be thrown away.
-# Uses extglob, so this needs bash.  Remove this section to keep all plugins
-RUN <<EOR
-#!/bin/bash
-    set -e
-    shopt -s extglob
-    cd /usr/lib/sdrpp/plugins
-    rm -f !(sdrplay_source.so)
 EOR
 
 # Strip symbols/debug info from the non-distro binaries (vendor and sdrpp builds
@@ -61,57 +51,58 @@ RUN <<EOR
 EOR
 
 ######################################################
-# Build our filesystem. Using a new layer removes potential junk.
-# copy all files from dga-build.
-# Then run the muntzing process to remove unneeded files
-# and last, install busybox.
+# Build the final filesystem in /out by copying IN only what is needed.
+#   - the sdrpp and sdrplay_apiService binaries
+#   - the plugins we want (SDRplay + rtl_tcp, both network/API based, no USB claim by sdrpp)
+#   - every shared library those binaries need, found with ldd, so there is no
+#     hand-kept library list to maintain when sdrpp or SDRplay versions change
+#   - busybox with all applets, /etc/passwd and /etc/group (for USER nobody)
+# Nothing is ever deleted, so scratch gets a minimal, clean filesystem.
 
-FROM debian:trixie-slim AS dga-filesystem
-
-COPY --from=dga-build /usr/lib/sdrpp /lib/sdrpp/
-COPY --from=dga-build /usr/lib/x86_64-linux-gnu/ /usr/lib/x86_64-linux-gnu/
-COPY --from=dga-build /usr/bin/sdrpp /sdrpp/
-COPY --from=dga-build /sdrplay/amd64/sdrplay_apiService /sdrpp/
-COPY --from=dga-build /usr/bin/busybox /usr/bin/
-COPY files/ /sdrpp
-
+WORKDIR /
+COPY files/ /out/sdrpp/
 RUN <<EOR
 #!/bin/bash
     set -e
-    shopt -s extglob # bash extension for rm -rf !(except_files|...)
+    OUT=/out
+    mkdir -p $OUT/usr/lib/x86_64-linux-gnu $OUT/usr/lib/sdrpp/plugins \
+             $OUT/usr/bin $OUT/lib64 $OUT/etc $OUT/sdrpp $OUT/tmp
+    chmod 1777 $OUT/tmp
+    ln -s usr/lib $OUT/lib
+    ln -s usr/bin $OUT/bin
 
-#   remove all libraries except ...
-    cd /usr/lib/x86_64-linux-gnu
-    EXC="!(libc.*|ld-linux*"
-    EXC+="|libsdrplay_api.so.*|libsdrpp_core.*|libresolv.*"
-    EXC+="|libOpenGL.*|libfftw3f.*|libvolk*|libzstd.*|libm.*"
-    EXC+="|libdl.*|libX11.so.*|libpthread.*|libGLdispatch.*"
-    EXC+="|liborc-0.4.*|libxcb.*|libXau.*|libXdmcp.*|libbsd.*"
-    EXC+="|libmd.*|libusb*|libstdc++*|libselinux*"
-    EXC+="|libudev*|libgcc_s*|librt*|libglfw.*"
-    EXC+="|libGL.so.*|libGLX.so.*|libcap.so.*)"
-    rm -rf $EXC
+#   binaries
+    cp -a /usr/bin/sdrpp /sdrplay/amd64/sdrplay_apiService $OUT/sdrpp/
 
-#   remove anything not needed in the container
-    cd /            && rm -rf !(bin|dev|etc|lib|lib64|proc|run|sbin|sdrpp|sys|usr)
-    cd /etc         && rm -rf !(passwd|group|gshadow|shadow|hosts|resolv.conf)
-    cd /usr         && rm -rf !(lib|bin|sbin|lib64)
-    cd /usr/lib     && rm -rf !(x86_64-linux-gnu|sdrpp)
-    cd /usr/sbin    && rm -f *
-    cd /usr/bin     && rm -f !(busybox|bash)   # Must be last
+#   plugins: add or remove names here
+#    for p in sdrplay_source rtl_tcp_source; do
+    for p in sdrplay_source ; do
+        cp -a /usr/lib/sdrpp/plugins/$p.so $OUT/usr/lib/sdrpp/plugins/
+    done
 
-    /bin/busybox --install -s
-    rm /bin/bash
+#   busybox: install every applet as a symlink
+    cp -a /bin/busybox $OUT/bin/busybox
+    /bin/busybox --install -s $OUT/bin
+
+#   users for USER nobody.
+    cp -a /etc/passwd /etc/group $OUT/etc/
+
+#   shared libraries: whatever ldd says the binaries and plugins need
+    for f in /usr/bin/sdrpp /sdrplay/amd64/sdrplay_apiService /usr/bin/busybox $OUT/usr/lib/sdrpp/plugins/*.so; do
+        ldd "$f"
+    done | awk '$2=="=>" && $3 ~ /^\// {print $3} $1 ~ /^\// && $2 ~ /^\(/ {print $1}' \
+         | sort -u | while read -r lib; do
+        cp -L --parents "$lib" $OUT
+    done
 EOR
 
 #####################################################################
-#   Ready for scratch.  We use scratch to keep deleted space out of
-#   the install layer. Saves almost 500 MB.
-#       Libraries are in /usr/lib/x86_64-linux-gnu
-#       binaries and config files are in /sdrpp
+#   Ready for scratch. Only the needed files get copied in.
+#       Libraries are in /usr/lib/x86_64-linux-gnu (and the loader in /lib64)
+#       binaries and config files are in /sdrpp, plugins in /usr/lib/sdrpp/plugins
 
-FROM scratch AS install
-COPY --from=dga-filesystem / /
+FROM scratch
+COPY --from=dga-build /out/ /
 EXPOSE 5259
 WORKDIR /sdrpp
 USER nobody

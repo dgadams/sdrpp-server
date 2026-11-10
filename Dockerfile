@@ -24,7 +24,7 @@ RUN <<ENDRUN
     set -e
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get -y --no-install-recommends install ./sdrpp.deb libusb-1.0-0 libglfw3 busybox binutils
+    apt-get -y --no-install-recommends install ./sdrpp.deb libusb-1.0-0 libglfw3 binutils busybox
 ENDRUN
 # sdrpp is installed in /usr/bin/sdrpp
 # libraries are in /usr/lib/libsdrpp_core* and /usr/lib/sdrpp

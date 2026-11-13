@@ -18,8 +18,6 @@ ENDRUN
 # install sdrpp
 ADD "https://github.com/AlexandreRouma/SDRPlusPlus/releases/download/nightly/sdrpp_debian_trixie_amd64.deb" ./sdrpp.deb
 # --no-install-recommends avoids pulling in extra libs.
-# busybox-static is a single static binary, so it needs no shared libraries at all.
-# binutils is only for strip and never reaches the final image.
 RUN <<ENDRUN
     set -e
     export DEBIAN_FRONTEND=noninteractive

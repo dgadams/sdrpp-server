@@ -17,9 +17,3 @@ services:
       - 5259:5259
     volumes:
       - /home/doug/.sdr++:/sdrpp/conf.d
-    healthcheck:
-      test: timeout 1 nc localhost 5259 || [ $$? -eq 143 ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s

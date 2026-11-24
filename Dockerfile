@@ -104,4 +104,8 @@ COPY --from=dga-build /out/ /
 EXPOSE 5259
 WORKDIR /sdrpp
 USER nobody
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD timeout 1 nc localhost 5259 || [ $? -eq 143 ] || exit 1
+
 CMD ["/sdrpp/sdrpp.sh" ]

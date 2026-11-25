@@ -13,6 +13,8 @@ services:
     init: true
     devices:
       - /dev/bus/usb:/dev/bus/usb
+    device_cgroup_rules:
+      - 'c 189:* rmw'
     ports:
       - 5259:5259
     volumes:
